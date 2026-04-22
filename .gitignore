@@ -1,0 +1,5 @@
+*.csv
+*.parquet
+content/*
+models/saved/*
+*.zip

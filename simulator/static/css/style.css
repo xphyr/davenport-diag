@@ -1,0 +1,277 @@
+:root {
+    --bg-dark: #0f111a;
+    --bg-card: rgba(25, 28, 41, 0.65);
+    --border-glow: rgba(99, 102, 241, 0.3);
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --accent: #6366f1;
+    --accent-glow: #818cf8;
+    --danger: #ef4444;
+    --danger-glow: #f87171;
+    --success: #10b981;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Dynamic Animated Background */
+.bg-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background: radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.1), transparent 25%);
+    filter: blur(60px);
+    animation: bgPulse 10s ease-in-out infinite alternate;
+}
+
+@keyframes bgPulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.2); }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-family: 'Outfit', sans-serif;
+}
+
+.icon-large {
+    font-size: 2.5rem;
+    color: var(--accent);
+    filter: drop-shadow(0 0 10px var(--border-glow));
+}
+
+h1 {
+    font-weight: 700;
+    font-size: 1.8rem;
+    letter-spacing: -0.5px;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--success);
+}
+
+.pulse {
+    width: 8px;
+    height: 8px;
+    background-color: var(--success);
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: pulseObj 2s infinite;
+}
+
+@keyframes pulseObj {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--border-glow);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
+}
+
+/* Dashboard Grid */
+.dashboard .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+/* Metrics */
+.metric-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.metric-header h3 {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.metric-value {
+    font-family: 'Outfit', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.unit {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar .fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--accent);
+}
+
+/* Stats Card */
+.stats-card h3 {
+    font-family: 'Outfit', sans-serif;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.stats-list {
+    list-style: none;
+}
+
+.stats-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stats-list li:last-child {
+    border-bottom: none;
+}
+
+.stats-list .label {
+    color: var(--text-secondary);
+}
+
+.stats-list .value {
+    font-family: 'Outfit', monospace;
+    font-weight: 600;
+    color: var(--accent-glow);
+}
+
+/* Warning Banner */
+.alert-banner {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    border-left: 4px solid var(--danger);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    color: var(--danger-glow);
+    animation: slideIn 0.4s ease-out forwards;
+}
+
+.alert-banner.hidden {
+    display: none;
+}
+
+.alert-banner .material-symbols-outlined {
+    font-size: 2.5rem;
+}
+
+.alert-text strong {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.alert-text p {
+    color: #fca5a5;
+    font-size: 0.95rem;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Warning States */
+.danger-state .glass-card {
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 8px 30px rgba(239, 68, 68, 0.15);
+}
+
+.danger-state .progress-bar .fill {
+    background: var(--danger);
+    box-shadow: 0 0 10px var(--danger);
+}
+
+.danger-state .status-badge {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: var(--danger);
+}
+
+.danger-state .pulse {
+    background-color: var(--danger);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    animation: pulseDanger 1s infinite;
+}
+
+@keyframes pulseDanger {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
