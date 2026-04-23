@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier, IsolationForest
+from sklearn.ensemble import IsolationForest
+from lightgbm import LGBMClassifier
 from sklearn.metrics import classification_report, confusion_matrix
 import joblib
 import os
@@ -58,14 +59,14 @@ def train_model():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
     
     print(f"Training set: {X_train.shape}, Test set: {X_test.shape}")
-    print("Training Random Forest Classifier...")
+    print("Training LightGBM Classifier...")
     
-    # Using a shallow Random Forest for fast edge inference and training
-    # Added class_weight='balanced' to handle the heavy class imbalance
-    clf = RandomForestClassifier(
-        n_estimators=50, 
-        max_depth=10, 
-        random_state=42, 
+    # Using LightGBM for better precision and fast inference
+    clf = LGBMClassifier(
+        n_estimators=100,
+        max_depth=7,
+        learning_rate=0.1,
+        random_state=42,
         n_jobs=-1,
         class_weight='balanced'
     )
