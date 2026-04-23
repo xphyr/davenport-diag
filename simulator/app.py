@@ -1,14 +1,19 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import onnxruntime as ort
 import numpy as np
 import random
 import time
+import os
+import joblib
 
 app = Flask(__name__)
 
 # Load models
-onnx_path = '../models/saved/rf_engine_warning.onnx'
-iso_path = '../models/saved/isolation_forest.joblib'
+base_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(base_dir)
+onnx_path = os.path.join(project_root, 'models/saved/rf_engine_warning.onnx')
+iso_path = os.path.join(project_root, 'models/saved/isolation_forest.joblib')
+
 try:
     session = ort.InferenceSession(onnx_path)
     input_name = session.get_inputs()[0].name
@@ -21,10 +26,13 @@ except Exception as e:
 
 # Simulator state
 sim_state = {
-    'rpm': 2000.0,
-    'load': 40.0,
-    'speed': 60.0,
+    'rpm': 800.0,
+    'load': 20.0,
+    'speed': 0.0,
     'oat': 25.0,
+    'throttle': 0.0,
+    'brake': 0.0,
+    'ext_load': 20.0,
     'buffer': []
 }
 
@@ -32,23 +40,45 @@ sim_state = {
 def index():
     return render_template('index.html')
 
+@app.route('/control', methods=['POST'])
+def control():
+    data = request.json
+    if 'throttle' in data:
+        sim_state['throttle'] = float(data['throttle'])
+    if 'brake' in data:
+        sim_state['brake'] = float(data['brake'])
+    if 'ext_load' in data:
+        sim_state['ext_load'] = float(data['ext_load'])
+    return jsonify({'status': 'ok'})
+
 @app.route('/stream')
 def stream():
-    # Random walk the parameters to simulate driving
-    sim_state['speed'] += random.uniform(-2, 2)
-    sim_state['speed'] = max(0, min(140, sim_state['speed']))
+    # Simple physics simulation
+    # Acceleration based on throttle, load, and braking
+    power = 4.0 * sim_state['throttle']
+    friction = 0.5 + (sim_state['ext_load'] / 20.0) # Base friction + weight
+    braking = 8.0 * sim_state['brake']
     
-    sim_state['rpm'] = (sim_state['speed'] * 30) + random.uniform(-100, 100)
-    if sim_state['speed'] < 5:
-        sim_state['rpm'] = 800 + random.uniform(-50, 50)
-        
-    sim_state['load'] += random.uniform(-5, 5)
+    # Drag increases with speed
+    drag = (sim_state['speed'] ** 2) * 0.005
+    
+    acceleration = power - friction - braking - drag
+    sim_state['speed'] += acceleration
+    sim_state['speed'] = max(0, min(160, sim_state['speed']))
+    
+    # RPM logic: Idle is 800. Revs up with throttle and speed.
+    idle_rpm = 800
+    if sim_state['speed'] < 1:
+        sim_state['rpm'] = idle_rpm + (sim_state['throttle'] * 5000)
+    else:
+        # Simple linear gear proxy
+        sim_state['rpm'] = (sim_state['speed'] * 35) + (sim_state['throttle'] * 1500)
+    
+    sim_state['rpm'] = max(idle_rpm, min(7000, sim_state['rpm']))
+    
+    # Load is influenced by throttle and the weight dial
+    sim_state['load'] = (sim_state['throttle'] * 70) + (sim_state['ext_load'] / 2) + random.uniform(-2, 2)
     sim_state['load'] = max(10, min(100, sim_state['load']))
-    
-    # Randomly inject an anomaly
-    if random.random() < 0.05:
-        sim_state['load'] = 98.0
-        sim_state['rpm'] = 6000.0
         
     # Update buffer (keep last 60 samples for ~60 seconds if polling at 1Hz)
     sim_state['buffer'].append({
@@ -131,4 +161,4 @@ def stream():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)

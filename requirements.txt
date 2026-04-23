@@ -1,8 +1,13 @@
 pandas
+numpy
 pyarrow
 fastparquet
 scikit-learn
-matplotlib
-skl2onnx
+lightgbm
 onnxruntime
+skl2onnx
+onnxmltools
+onnxconverter-common
 flask
+joblib
+matplotlib

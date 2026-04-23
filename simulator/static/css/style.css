@@ -131,6 +131,72 @@ h1 {
 }
 
 /* Metrics */
+.control-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.pedal-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.pedal {
+    flex: 1;
+    padding: 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.pedal.gas {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.pedal.gas:active {
+    background: #059669;
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+.pedal.brake {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.pedal.brake:active {
+    background: #dc2626;
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+.slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.slider-group label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.slider-group input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+}
+
+#load-value {
+    font-weight: 700;
+    color: var(--accent);
+    text-align: right;
+}
+
 .metric-header {
     display: flex;
     align-items: center;
