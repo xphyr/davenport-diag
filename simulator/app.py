@@ -6,15 +6,18 @@ import time
 
 app = Flask(__name__)
 
-# Load the model
+# Load models
 onnx_path = '../models/saved/rf_engine_warning.onnx'
+iso_path = '../models/saved/isolation_forest.joblib'
 try:
     session = ort.InferenceSession(onnx_path)
     input_name = session.get_inputs()[0].name
     label_name = session.get_outputs()[0].name
+    iso_forest = joblib.load(iso_path)
 except Exception as e:
-    print(f"Warning: Could not load ONNX model: {e}")
+    print(f"Warning: Could not load models: {e}")
     session = None
+    iso_forest = None
 
 # Simulator state
 sim_state = {
@@ -22,7 +25,7 @@ sim_state = {
     'load': 40.0,
     'speed': 60.0,
     'oat': 25.0,
-    'buffer': [] # To calculate rolling stats
+    'buffer': []
 }
 
 @app.route('/')
@@ -56,6 +59,15 @@ def stream():
     if len(sim_state['buffer']) > 60:
         sim_state['buffer'].pop(0)
         
+    # Simulate fuel trims for the isolation forest
+    trim_b1 = random.uniform(-2, 2) + (sim_state['load'] / 10)
+    trim_b2 = random.uniform(-2, 2) + (sim_state['load'] / 10)
+    if sim_state['load'] > 90:
+        trim_b1 += random.uniform(5, 15)
+        trim_b2 += random.uniform(5, 15)
+    
+    imbalance = abs(trim_b1 - trim_b2)
+        
     # Calculate rolling features
     rpm_vals = [s['rpm'] for s in sim_state['buffer']]
     load_vals = [s['load'] for s in sim_state['buffer']]
@@ -73,11 +85,19 @@ def stream():
     stress_index = rpm_mean * load_mean
     gear_ratio = sim_state['rpm'] / sim_state['speed'] if sim_state['speed'] > 0 else 0
             
+    # Unsupervised Anomaly Score
+    if iso_forest:
+        # decision_function returns scores where lower is more anomalous
+        iso_X = np.array([[trim_b1, trim_b2, imbalance]], dtype=np.float32)
+        anomaly_score = iso_forest.decision_function(iso_X)[0]
+    else:
+        anomaly_score = 0
+            
     # Predict using ONNX
     prediction = 0
     if session:
         # Features: RPM_mean, RPM_max, Load_mean, Load_max, Speed_mean, OAT, 
-        #           RPM_delta, Load_delta, Stress_Index, Gear_Ratio
+        #           RPM_delta, Load_delta, Stress_Index, Gear_Ratio, Anomaly_Score
         X = np.array([[
             rpm_mean,
             rpm_max,
@@ -88,7 +108,8 @@ def stream():
             rpm_delta,
             load_delta,
             stress_index,
-            gear_ratio
+            gear_ratio,
+            anomaly_score
         ]], dtype=np.float32)
         
         start_time = time.time()
@@ -105,7 +126,8 @@ def stream():
         'oat': round(sim_state['oat'], 2),
         'prediction': prediction,
         'latency_ms': round(latency, 2),
-        'is_imbalanced': False # For future multi-bank visualization
+        'is_imbalanced': imbalance > 10,
+        'anomaly_score': round(float(anomaly_score), 4)
     })
 
 if __name__ == '__main__':

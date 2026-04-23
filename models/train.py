@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, IsolationForest
 from sklearn.metrics import classification_report, confusion_matrix
 import joblib
 import os
@@ -13,7 +13,20 @@ def load_processed_data(path='data/processed_data.parquet'):
 def train_model():
     df = load_processed_data()
     
-    # Feature Engineering: Use driving characteristics to predict the warning state
+    # Unsupervised Anomaly Detection: isolation forest on trims
+    print("Training Isolation Forest for unsupervised anomaly detection...")
+    iso_features = ['Rolling_Total_Trim_B1', 'Rolling_Total_Trim_B2', 'Bank_Imbalance']
+    iso_forest = IsolationForest(contamination=0.05, random_state=42, n_jobs=-1)
+    
+    # We fit on a subset to keep training time reasonable
+    iso_sample = df[iso_features].dropna().sample(min(500000, len(df)), random_state=42)
+    iso_forest.fit(iso_sample)
+    
+    # Add Anomaly Score as a new feature
+    print("Generating anomaly scores...")
+    df['Anomaly_Score'] = iso_forest.decision_function(df[iso_features].fillna(0))
+    
+    # Feature Engineering: Use driving characteristics + anomaly score to predict warning
     features = [
         'RPM_rolling_mean', 
         'RPM_rolling_max', 
@@ -24,7 +37,8 @@ def train_model():
         'RPM_delta',
         'Load_delta',
         'Stress_Index',
-        'Gear_Ratio_Proxy'
+        'Gear_Ratio_Proxy',
+        'Anomaly_Score'
     ]
     target = 'Engine_Warning'
     
@@ -36,6 +50,9 @@ def train_model():
     
     X = df_clean[features]
     y = df_clean[target]
+    
+    # Save the isolation forest for deployment
+    joblib.dump(iso_forest, 'models/saved/isolation_forest.joblib')
     
     # Split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)

@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const barSpeed = document.getElementById('bar-speed');
     
     const valLatency = document.getElementById('val-latency');
+    const valAnomaly = document.getElementById('val-anomaly');
     const alertBanner = document.getElementById('alert-banner');
     
     // Polling Loop
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         valLoad.innerText = data.load.toFixed(1);
         valSpeed.innerText = data.speed.toFixed(0);
         valLatency.innerText = data.latency_ms.toFixed(2) + ' ms';
+        valAnomaly.innerText = data.anomaly_score.toFixed(4);
         
         // Update bars
         // Max RPM ~7000
