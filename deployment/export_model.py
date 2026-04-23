@@ -8,8 +8,8 @@ def export_model():
     print(f"Loading trained model from {model_path}...")
     clf = joblib.load(model_path)
     
-    # 5 input features
-    initial_type = [('float_input', FloatTensorType([None, 5]))]
+    # 6 input features: RPM_mean, RPM_max, Load_mean, Load_max, Speed_mean, OAT
+    initial_type = [('float_input', FloatTensorType([None, 6]))]
     
     print("Converting model to ONNX format...")
     onnx_model = convert_sklearn(clf, initial_types=initial_type)

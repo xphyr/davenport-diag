@@ -11,11 +11,11 @@ def run_inference():
     label_name = session.get_outputs()[0].name
     
     print("Simulating edge inference on dummy data...")
-    # Features: 'Engine_RPM_RPM', 'Absolute_Load_pct', 'Vehicle_Speed_km_per_h', 'OAT_DegC', 'log_MAF'
-    # Dummy data: [RPM, Load, Speed, OAT, log_MAF]
+    # Features: 'RPM_rolling_mean', 'RPM_rolling_max', 'Load_rolling_mean', 'Load_rolling_max', 'Speed_rolling_mean', 'OAT_DegC'
+    # Dummy data: [RPM_mean, RPM_max, Load_mean, Load_max, Speed_mean, OAT]
     dummy_data = np.array([
-        [2000.0, 40.0, 60.0, 25.0, 3.5], # Normal
-        [5000.0, 95.0, 120.0, 30.0, 5.0], # High Load
+        [2000.0, 2200.0, 40.0, 45.0, 60.0, 25.0], # Normal
+        [5000.0, 5500.0, 95.0, 98.0, 120.0, 30.0], # Aggressive/High Load
     ], dtype=np.float32)
     
     start_time = time.time()

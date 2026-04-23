@@ -15,11 +15,12 @@ def train_model():
     
     # Feature Engineering: Use driving characteristics to predict the warning state
     features = [
-        'Engine_RPM_RPM', 
-        'Absolute_Load_pct', 
-        'Vehicle_Speed_km_per_h', 
-        'OAT_DegC', 
-        'log_MAF'
+        'RPM_rolling_mean', 
+        'RPM_rolling_max', 
+        'Load_rolling_mean', 
+        'Load_rolling_max', 
+        'Speed_rolling_mean',
+        'OAT_DegC'
     ]
     target = 'Engine_Warning'
     

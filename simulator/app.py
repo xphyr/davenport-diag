@@ -22,8 +22,7 @@ sim_state = {
     'load': 40.0,
     'speed': 60.0,
     'oat': 25.0,
-    'log_maf': 3.5,
-    'is_anomaly': False
+    'buffer': [] # To calculate rolling stats
 }
 
 @app.route('/')
@@ -47,20 +46,38 @@ def stream():
     if random.random() < 0.05:
         sim_state['load'] = 98.0
         sim_state['rpm'] = 6000.0
-        sim_state['is_anomaly'] = True
-    else:
-        if random.random() < 0.1: # recover from anomaly
-            sim_state['is_anomaly'] = False
+        
+    # Update buffer (keep last 60 samples for ~60 seconds if polling at 1Hz)
+    sim_state['buffer'].append({
+        'rpm': sim_state['rpm'],
+        'load': sim_state['load'],
+        'speed': sim_state['speed']
+    })
+    if len(sim_state['buffer']) > 60:
+        sim_state['buffer'].pop(0)
+        
+    # Calculate rolling features
+    rpm_vals = [s['rpm'] for s in sim_state['buffer']]
+    load_vals = [s['load'] for s in sim_state['buffer']]
+    speed_vals = [s['speed'] for s in sim_state['buffer']]
+    
+    rpm_mean = sum(rpm_vals) / len(rpm_vals)
+    rpm_max = max(rpm_vals)
+    load_mean = sum(load_vals) / len(load_vals)
+    load_max = max(load_vals)
+    speed_mean = sum(speed_vals) / len(speed_vals)
             
     # Predict using ONNX
     prediction = 0
     if session:
+        # Features: RPM_mean, RPM_max, Load_mean, Load_max, Speed_mean, OAT
         X = np.array([[
-            sim_state['rpm'],
-            sim_state['load'],
-            sim_state['speed'],
-            sim_state['oat'],
-            sim_state['log_maf']
+            rpm_mean,
+            rpm_max,
+            load_mean,
+            load_max,
+            speed_mean,
+            sim_state['oat']
         ]], dtype=np.float32)
         
         start_time = time.time()
@@ -69,7 +86,6 @@ def stream():
         prediction = int(pred[0])
     else:
         latency = 0.0
-        prediction = 1 if sim_state['is_anomaly'] else 0
 
     return jsonify({
         'rpm': round(sim_state['rpm'], 2),

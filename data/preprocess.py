@@ -1,12 +1,16 @@
 import pandas as pd
 import glob
 import os
+import argparse
 
 def load_data(data_dir='data/content/ved_phase_1', max_files=2):
     """Load a subset of parquet files for development/testing."""
     files = glob.glob(os.path.join(data_dir, '*.parquet'))
+    if max_files:
+        files = files[:max_files]
+        
     dfs = []
-    for f in files[:max_files]:
+    for f in files:
         print(f"Loading {f}...")
         df = pd.read_parquet(f)
         dfs.append(df)
@@ -44,6 +48,19 @@ def preprocess(df):
     # rolling() with time window keeps the group keys in the index.
     # we can drop them and map back to the dataframe
     df['Rolling_Total_Trim_B1'] = rolling_trim.reset_index(level=[0,1], drop=True)
+    
+    print("Calculating rolling features (60s window)...")
+    # 60 second rolling features for driving style
+    grouped = df.groupby(['VehId', 'Trip'])
+    
+    df['RPM_rolling_mean'] = grouped['Engine_RPM_RPM'].rolling('60s').mean().reset_index(level=[0,1], drop=True)
+    df['RPM_rolling_max'] = grouped['Engine_RPM_RPM'].rolling('60s').max().reset_index(level=[0,1], drop=True)
+    
+    df['Load_rolling_mean'] = grouped['Absolute_Load_pct'].rolling('60s').mean().reset_index(level=[0,1], drop=True)
+    df['Load_rolling_max'] = grouped['Absolute_Load_pct'].rolling('60s').max().reset_index(level=[0,1], drop=True)
+    
+    df['Speed_rolling_mean'] = grouped['Vehicle_Speed_km_per_h'].rolling('60s').mean().reset_index(level=[0,1], drop=True)
+    
     df = df.reset_index()
     
     # Define "Failure/Warning" condition:
@@ -60,7 +77,11 @@ def preprocess(df):
     return df
 
 def main():
-    df = load_data()
+    parser = argparse.ArgumentParser(description='Preprocess VED dataset with rolling window features.')
+    parser.add_argument('--max_files', type=int, default=2, help='Maximum number of files to load (default: 2)')
+    args = parser.parse_args()
+
+    df = load_data(max_files=args.max_files)
     df_clean = preprocess(df)
     
     out_path = 'data/processed_data.parquet'
