@@ -20,7 +20,11 @@ def train_model():
         'Load_rolling_mean', 
         'Load_rolling_max', 
         'Speed_rolling_mean',
-        'OAT_DegC'
+        'OAT_DegC',
+        'RPM_delta',
+        'Load_delta',
+        'Stress_Index',
+        'Gear_Ratio_Proxy'
     ]
     target = 'Engine_Warning'
     
@@ -40,7 +44,14 @@ def train_model():
     print("Training Random Forest Classifier...")
     
     # Using a shallow Random Forest for fast edge inference and training
-    clf = RandomForestClassifier(n_estimators=50, max_depth=10, random_state=42, n_jobs=-1)
+    # Added class_weight='balanced' to handle the heavy class imbalance
+    clf = RandomForestClassifier(
+        n_estimators=50, 
+        max_depth=10, 
+        random_state=42, 
+        n_jobs=-1,
+        class_weight='balanced'
+    )
     clf.fit(X_train, y_train)
     
     print("Evaluating model...")

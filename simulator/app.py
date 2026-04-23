@@ -66,18 +66,29 @@ def stream():
     load_mean = sum(load_vals) / len(load_vals)
     load_max = max(load_vals)
     speed_mean = sum(speed_vals) / len(speed_vals)
+    
+    # Advanced Phase 2 Features
+    rpm_delta = sim_state['rpm'] - sim_state['buffer'][-2]['rpm'] if len(sim_state['buffer']) > 1 else 0
+    load_delta = sim_state['load'] - sim_state['buffer'][-2]['load'] if len(sim_state['buffer']) > 1 else 0
+    stress_index = rpm_mean * load_mean
+    gear_ratio = sim_state['rpm'] / sim_state['speed'] if sim_state['speed'] > 0 else 0
             
     # Predict using ONNX
     prediction = 0
     if session:
-        # Features: RPM_mean, RPM_max, Load_mean, Load_max, Speed_mean, OAT
+        # Features: RPM_mean, RPM_max, Load_mean, Load_max, Speed_mean, OAT, 
+        #           RPM_delta, Load_delta, Stress_Index, Gear_Ratio
         X = np.array([[
             rpm_mean,
             rpm_max,
             load_mean,
             load_max,
             speed_mean,
-            sim_state['oat']
+            sim_state['oat'],
+            rpm_delta,
+            load_delta,
+            stress_index,
+            gear_ratio
         ]], dtype=np.float32)
         
         start_time = time.time()
@@ -93,7 +104,8 @@ def stream():
         'speed': round(sim_state['speed'], 2),
         'oat': round(sim_state['oat'], 2),
         'prediction': prediction,
-        'latency_ms': round(latency, 2)
+        'latency_ms': round(latency, 2),
+        'is_imbalanced': False # For future multi-bank visualization
     })
 
 if __name__ == '__main__':
