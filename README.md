@@ -39,7 +39,7 @@ We will be using the following dataset from Kaggle for training:
 
 We will use the "part 2" dataset for testing purposes.
 
-- [VED Failure Prediction Dataset (Part 2)](https://www.kaggle.com/datasets/starben/ved-refined-20m-engine-records-part-22/data)
+- [VED Failure Prediction Dataset (Part 2/2)](https://www.kaggle.com/datasets/starben/ved-refined-20m-engine-records-part-22/data)
 
 ### Installing the Data
 
@@ -53,4 +53,21 @@ kaggle datasets download -d starben/ved-refined-20m-engine-records-part-22 -p da
 # Unzip the data
 unzip data/ved-refined-20m-engine-records-part-12.zip -d data
 unzip data/ved-refined-20m-engine-records-part-22.zip -d data
+```
+## Run the data preprocessing
+
+```bash
+python3 data/preprocess.py --maxfiles 100
+``` 
+
+### Run training model
+
+```bash
+python3 models/train.py
+```
+
+### Export the model to ONYX format 
+
+```bash
+python3 deployment/export_model.py
 ```

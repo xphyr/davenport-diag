@@ -1,0 +1,6 @@
+numpy
+onnxruntime
+flask
+joblib
+scikit-learn
+lightgbm

@@ -12,7 +12,7 @@ app = Flask(__name__)
 base_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(base_dir)
 onnx_path = os.path.join(project_root, 'models/saved/rf_engine_warning.onnx')
-iso_path = os.path.join(project_root, 'models/saved/isolation_forest.joblib')
+iso_path = os.path.join(project_root, 'models/saved/rf_engine_warning.joblib')
 
 try:
     session = ort.InferenceSession(onnx_path)
