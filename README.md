@@ -77,13 +77,13 @@ python3 deployment/export_model.py
 ### Building the containers
 
 ```bash
-podman build -t localhost/devenport_model:v1 models/Containerfile.model
-podman build -t localhost/devenport_demo:v1 simulator/Containerfile.app
+podman build -t localhost/davenport_model:v1 models/Containerfile.model
+podman build -t localhost/davenport_demo:v1 simulator/Containerfile.app
 ```
 
 ### Running the containers
 
 ```bash
-podman run -p 5000:5000 --mount type=image,source=localhost/devenport_model:v1,target=/models localhost/devenport_demo:v1
+podman run -p 5000:5000 --mount type=image,source=localhost/davenport_model:v1,target=/models localhost/davenport_demo:v1
 ```
 

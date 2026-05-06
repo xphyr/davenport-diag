@@ -10,6 +10,12 @@ spec:
     spec:
       os:
         image: quay.io/markd/centos9-bootc-esx:v4
+      config:
+        - name: hostname-config
+          inline:
+            - path: /etc/hostname
+              content: "{{ .metadata.labels.alias }}"
+              mode: 0644
       applications:
       - name: davenport-diag-app
         appType: quadlet
