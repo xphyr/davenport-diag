@@ -18,14 +18,14 @@ spec:
             content: |
               [Volume]
               Driver=image
-              Image=quay.io/markd/devenport_model:v1 
+              Image=quay.io/markd/davenport_model:v1 
           - path: davenport-diag.container
             content: |-
               [Unit]
               Description=DavenportDiag Monitoring Server
 
               [Container]
-              Image=docker.io/technitium/dns-server:latest
+              Image=quay.io/markd/davenport_simulator:v1
               Label="io.containers.autoupdate=registry"
 
               Volume=davenport-data:/models

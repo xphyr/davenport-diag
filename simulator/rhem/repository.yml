@@ -1,7 +1,7 @@
 apiVersion: flightctl.io/v1beta1
 kind: Repository
 metadata:
-  name: davenport_diag
+  name: davenport-diag
 spec:
-  url: https://github.com/xphyr/davenport_diag
+  url: https://github.com/xphyr/davenport-diag
   type: git
