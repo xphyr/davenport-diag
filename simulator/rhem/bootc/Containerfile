@@ -1,0 +1,36 @@
+FROM quay.io/centos-bootc/centos-bootc:stream9
+
+# Update the base contianer
+RUN dnf upgrade -y && \
+    dnf clean all
+
+# Add greenboot to the system to fail back on failed upgrade
+RUN dnf -y install greenboot greenboot-default-health-checks && \
+    dnf clean all && \
+    systemctl enable greenboot-healthcheck.service
+
+# Add cloud-init and open-vm-tools
+RUN dnf -y install cloud-init open-vm-tools \
+      --nodocs --setopt=install_weak_deps=False && \
+    dnf clean all && \
+    rm -rf /var/{cache,log} /run/cloud-init /run/dnf /tmp/* && \
+    ln -s ../cloud-init.target /usr/lib/systemd/system/default.target.wants && \
+    systemctl enable vmtoolsd.service
+
+# Add Flight Control agent
+# renovate: datasource=rpm depName=flightctl-agent registryUrl=https://rpm.flightctl.io/epel/9/x86_64/
+ARG FLIGHTCTL_VERSION=1.1.0
+RUN dnf -y config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.repo && \
+    dnf -y install flightctl-agent${FLIGHTCTL_VERSION:+-${FLIGHTCTL_VERSION}} \
+      --nodocs --setopt=install_weak_deps=False && \
+    dnf clean all && \
+    rm -rf /var/{cache,log} /run/rhsm /tmp/* && \
+    systemctl enable flightctl-agent.service
+
+ADD demo-authorized-key.pub /tmp/demo-authorized-key.pub
+
+RUN getent passwd cloud-user >/dev/null 2>&1 || useradd -m -G wheel cloud-user && \
+    mkdir -p /home/cloud-user/.ssh && \
+    install -m 0600 -o cloud-user -g cloud-user /tmp/demo-authorized-key.pub /home/cloud-user/.ssh/authorized_keys && \
+    printf 'cloud-user ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/90-cloud-user && \
+    chmod 0440 /etc/sudoers.d/90-cloud-user

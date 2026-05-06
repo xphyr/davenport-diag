@@ -1,0 +1,8 @@
+apiVersion: flightctl.io/v1beta1
+kind: ResourceSync
+metadata:
+  name: davenport-diag-sync
+spec:
+  repository: davenport_diag
+  path: /simulator/rhemdeployment/davenport_diag.yaml
+  targetRevision: main

@@ -1,0 +1,49 @@
+apiVersion: flightctl.io/v1alpha1
+kind: Fleet
+metadata:
+  name: davenport-diag
+spec:
+  selector:
+    matchLabels:
+      fleet: davenport
+  template:
+    spec:
+      os:
+        image: quay.io/markd/centos9-bootc-esx:v4
+      applications:
+      - name: davenport-diag-app
+        appType: quadlet
+        inline:
+          - path: davenport-data.volume
+            content: |
+              [Volume]
+              Driver=image
+              Image=quay.io/markd/devenport_model:v1 
+          - path: davenport-diag.container
+            content: |-
+              [Unit]
+              Description=DavenportDiag Monitoring Server
+
+              [Container]
+              Image=docker.io/technitium/dns-server:latest
+              Label="io.containers.autoupdate=registry"
+
+              Volume=davenport-data:/models
+
+              [Service]
+              Restart=on-failure
+              RestartSec=20
+              TimeoutStartSec=900
+              TimeoutStopSec=180
+
+              [Install]
+              WantedBy=default.target
+            contentEncoding: plain
+      resources:
+        - monitorType: CPU
+          alertRules:
+            - severity: Warning
+              duration: 10m
+              percentage: 50
+              description: 'CPU load is above 50% for more than 10 minutes.'
+          samplingInterval: 30s
