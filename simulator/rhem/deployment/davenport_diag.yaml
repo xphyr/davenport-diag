@@ -24,7 +24,8 @@ spec:
             content: |
               [Volume]
               Driver=image
-              Image=quay.io/markd/davenport_model:v1 
+              Image=quay.io/markd/davenport_model:v1alpha
+              Copy=true
           - path: davenport-diag.container
             content: |-
               [Unit]
