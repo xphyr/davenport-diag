@@ -273,8 +273,16 @@ h1 {
     color: var(--accent-glow);
 }
 
-/* Warning Banner */
+/* Warning Banner — fixed overlay so dashboard grid / pedals never reflow */
 .alert-banner {
+    position: fixed;
+    top: max(1rem, env(safe-area-inset-top, 0px));
+    left: max(1rem, env(safe-area-inset-left, 0px));
+    right: max(1rem, env(safe-area-inset-right, 0px));
+    z-index: 1000;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
     background: rgba(239, 68, 68, 0.15);
     border: 1px solid rgba(239, 68, 68, 0.5);
     border-left: 4px solid var(--danger);
@@ -283,9 +291,11 @@ h1 {
     display: flex;
     align-items: center;
     gap: 1.5rem;
-    margin-bottom: 2rem;
     color: var(--danger-glow);
-    animation: slideIn 0.4s ease-out forwards;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    animation: alertSlideIn 0.4s ease-out forwards;
 }
 
 .alert-banner.hidden {
@@ -308,9 +318,15 @@ h1 {
     font-size: 0.95rem;
 }
 
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes alertSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(calc(-100% - 0.5rem));
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Warning States */
