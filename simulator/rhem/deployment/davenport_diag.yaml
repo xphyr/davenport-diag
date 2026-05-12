@@ -34,7 +34,7 @@ spec:
               [Container]
               Image=quay.io/markd/davenport_simulator:v1
               Label="io.containers.autoupdate=registry"
-
+              PublishPort=5000:5000
               Volume=davenport-data.volume:/models:Z
 
               [Service]
