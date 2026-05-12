@@ -1,10 +1,18 @@
 from flask import Flask, render_template, jsonify, request
 import onnxruntime as ort
 import numpy as np
+import pandas as pd
 import random
 import time
 import os
 import joblib
+
+# Must match models/train.py isolation forest inputs (order + names).
+ISO_FEATURE_NAMES = (
+    'Rolling_Total_Trim_B1',
+    'Rolling_Total_Trim_B2',
+    'Bank_Imbalance',
+)
 
 app = Flask(__name__)
 
@@ -125,8 +133,11 @@ def stream():
     # Unsupervised Anomaly Score
     if iso_forest:
         # decision_function returns scores where lower is more anomalous
-        iso_X = np.array([[trim_b1, trim_b2, imbalance]], dtype=np.float32)
-        anomaly_score = iso_forest.decision_function(iso_X)[0]
+        iso_df = pd.DataFrame(
+            [[trim_b1, trim_b2, imbalance]],
+            columns=ISO_FEATURE_NAMES,
+        )
+        anomaly_score = float(iso_forest.decision_function(iso_df)[0])
     else:
         anomaly_score = 0
             
