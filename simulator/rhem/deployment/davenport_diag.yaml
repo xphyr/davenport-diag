@@ -24,7 +24,7 @@ spec:
             content: |
               [Volume]
               Driver=image
-              Image=quay.io/markd/davenport_model:v1
+              Image=quay.io/markd/davenport_model:v2
               Copy=true
           - path: davenport-diag.container
             content: |-
@@ -32,7 +32,7 @@ spec:
               Description=DavenportDiag Monitoring Server
 
               [Container]
-              Image=quay.io/markd/davenport_simulator:v1
+              Image=quay.io/markd/davenport_simulator:v3
               Label="io.containers.autoupdate=registry"
               PublishPort=5000:5000
               Volume=davenport-data.volume:/models:Z

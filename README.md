@@ -78,12 +78,12 @@ python3 deployment/export_model.py
 
 ```bash
 podman build -t localhost/davenport_model:v1 models/Containerfile.model
-podman build -t localhost/davenport_demo:v1 simulator/Containerfile.app
+podman build -t localhost/davenport_simulator:v1 simulator/Containerfile.app
 ```
 
 ### Running the containers
 
 ```bash
-podman run -p 5000:5000 --mount type=image,source=localhost/davenport_model:v1,target=/models localhost/davenport_demo:v1
+podman run -p 5000:5000 --mount type=image,source=quay.io/markd/davenport_model:v2,target=/models quay.io/markd/davenport_simulator:v3
 ```
 
