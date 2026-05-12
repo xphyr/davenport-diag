@@ -3,3 +3,4 @@
 content/*
 models/saved/*
 *.zip
+.venv/*

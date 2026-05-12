@@ -12,17 +12,24 @@ app = Flask(__name__)
 base_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(base_dir)
 onnx_path = os.path.join(project_root, 'models/saved/rf_engine_warning.onnx')
-iso_path = os.path.join(project_root, 'models/saved/rf_engine_warning.joblib')
+iso_path = os.path.join(project_root, 'models/saved/isolation_forest.joblib')
+
+session = None
+input_name = None
+label_name = None
+iso_forest = None
 
 try:
     session = ort.InferenceSession(onnx_path)
     input_name = session.get_inputs()[0].name
     label_name = session.get_outputs()[0].name
+except Exception as e:
+    print(f"Warning: Could not load ONNX model: {e}")
+
+try:
     iso_forest = joblib.load(iso_path)
 except Exception as e:
-    print(f"Warning: Could not load models: {e}")
-    session = None
-    iso_forest = None
+    print(f"Warning: Could not load isolation forest ({iso_path}): {e}")
 
 # Simulator state
 sim_state = {

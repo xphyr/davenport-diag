@@ -2,4 +2,5 @@ FROM scratch
 
 COPY saved/rf_engine_warning.onnx /saved/rf_engine_warning.onnx
 COPY saved/rf_engine_warning.joblib /saved/rf_engine_warning.joblib
+COPY saved/isolation_forest.joblib /saved/isolation_forest.joblib
 
