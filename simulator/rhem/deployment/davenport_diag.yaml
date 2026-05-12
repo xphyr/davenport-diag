@@ -35,7 +35,7 @@ spec:
               Image=quay.io/markd/davenport_simulator:v1
               Label="io.containers.autoupdate=registry"
 
-              Volume=davenport-data:/models
+              Volume=davenport-data.volume:/models:Z
 
               [Service]
               Restart=on-failure
